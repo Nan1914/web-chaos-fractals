@@ -1,6 +1,6 @@
 [theme]
 # Color principal (Botones, sliders, enlaces)
-primaryColor = "#00FFCC"
+primaryColor = "#8000ff"
 
 # Color de fondo de la página
 backgroundColor = "#0E1117"
