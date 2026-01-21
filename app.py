@@ -236,9 +236,9 @@ else:
         
     elif opcion == "Conjunto de Mandelbrot":
             # ==========================================
-        # OPCIÓN 4: CONJUNTO DE MANDELBROT
-        # ==========================================
-         st.title("El Conjunto de Mandelbrot")
+            # OPCIÓN 4: CONJUNTO DE MANDELBROT
+            # ==========================================
+            st.title("El Conjunto de Mandelbrot")
             st.markdown("El fractal más famoso. La frontera del conjunto es infinitamente compleja.")
             st.latex(r"z_{n+1} = z_n^2 + c")
         
@@ -282,6 +282,7 @@ else:
                     plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
                     plt.margins(0,0)
                     st.pyplot(plt)
+
 
 
 
