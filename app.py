@@ -183,6 +183,7 @@ else:
         Propuesto por **René Thomas**, este sistema es interesante por su simetría rotacional. A diferencia del de Lorenz, que tiene "dos alas", el atractor de Thomas forma una red compleja similar a una nube de trayectorias.
         
         El parámetro clave es la fricción $b$. Si $b$ es cercano a 0, el sistema es extremadamente caótico y llena todo el espacio. 
+        
         P.D.: Con $b=0.15$, aparece una estructura realmente bella.
         """)
         
@@ -274,4 +275,5 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
