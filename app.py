@@ -15,12 +15,19 @@ footer {visibility: hidden;}
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
+# --- Configuración General ---
+st.set_page_config(
+    page_title="El Laboratorio del Caos",
+    page_icon="🌀",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # ==========================================
 # 1. BARRA LATERAL (NAVEGACIÓN)
 # ==========================================
-st.sidebar.title("🌀 Explora el CAOS")
+st.sidebar.title("🌀 Experimenta el CAOS")
 
-# -- Categoría Principal --
 categoria = st.sidebar.radio(
     "📂 Categoría:",
     ["Sistemas Dinámicos", "Fractales", "Cuencas de Atracción"]
@@ -28,7 +35,6 @@ categoria = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 
-# -- Sub-Menú (Depende de la categoría) --
 opcion = ""
 
 if categoria == "Sistemas Dinámicos":
@@ -49,17 +55,16 @@ elif categoria == "Cuencas de Atracción":
         ("Fractal de Newton (Próximamente)",)
     )
 
-# -- Sección de Referencias (Fija abajo) --
+# -- Sección de Referencias --
 st.sidebar.markdown("---")
 st.sidebar.write("### ℹ️ Info")
 mostrar_referencias = st.sidebar.checkbox("Ver Bibliografía")
 
 
 # ==========================================
-# 2. LÓGICA DE VISUALIZACIÓN
+# 2. CONTENIDO PRINCIPAL
 # ==========================================
 
-# CASO A: El usuario quiere ver las Referencias
 if mostrar_referencias:
     st.title("📚 Bibliografía y Recursos")
     st.markdown("Recursos esenciales para entender el caos y la complejidad.")
@@ -80,27 +85,39 @@ if mostrar_referencias:
         * **Autosemejanza:** Patrones que se repiten a diferentes escalas.
         * **Efecto Mariposa:** Sensibilidad extrema a las condiciones iniciales.
         """)
-    
-    st.info("Desmarca la casilla 'Ver Bibliografía' en la barra lateral para volver a los gráficos.")
 
-# CASO B: Visualización de Experimentos
 else:
     # ---------------------------------------
     # SISTEMAS DINÁMICOS
     # ---------------------------------------
     if opcion == "Mapa Logístico (2D)":
         st.title("El Mapa Logístico")
-        st.markdown(r"Ecuación: $x_{n+1} = r x_n (1 - x_n)$")
+        st.markdown("""
+        ### El caos en las poblaciones
+        Popularizado por el biólogo **Robert May** en 1976, este modelo sencillo demuestra cómo un comportamiento complejo puede surgir de reglas deterministas muy simples.
+        Originalmente se diseñó para describir la evolución demográfica de una población (como conejos) donde los recursos son limitados.
+        """)
+        
+        st.latex(r"x_{n+1} = r \cdot x_n (1 - x_n)")
+        
+        st.info("""
+        * **$x_n$**: Población actual (entre 0 y 1).
+        * **$r$**: Tasa de reproducción.
+        * **Caos:** Ocurre cuando $r > 3.57$, donde la población nunca se repite.
+        """)
+        
+        st.divider()
         
         col1, col2 = st.columns([1, 3])
         with col1:
+            st.write("#### Controles")
             n_iter = st.slider("Iteraciones", 500, 2000, 1000)
             r_range = st.slider("Rango de r", 2.5, 4.0, (2.5, 4.0))
         
         with col2:
             r = np.linspace(r_range[0], r_range[1], 1000)
             x = 1e-5 * np.ones(1000)
-            for i in range(100): x = r * x * (1 - x) # Transitorio
+            for i in range(100): x = r * x * (1 - x)
             
             fig, ax = plt.subplots(figsize=(10, 6))
             fig.patch.set_facecolor('#0E1117')
@@ -115,12 +132,28 @@ else:
 
     elif opcion == "Atractor de Lorenz (3D)":
         st.title("Atractor de Lorenz")
-        st.markdown(r"El sistema clásico de convección atmosférica.")
+        st.markdown("""
+        ### El nacimiento del Efecto Mariposa
+        En 1963, el meteorólogo **Edward Lorenz** estaba simulando patrones climáticos en su ordenador. Al redondear unos decimales y volver a correr la simulación, descubrió que el resultado cambiaba drásticamente.
         
+        Había descubierto la **sensibilidad a las condiciones iniciales**: el aleteo de una mariposa en Brasil puede provocar un tornado en Texas.
+        """)
+        
+        st.latex(r"""
+        \begin{cases}
+        \frac{dx}{dt} = \sigma(y-x) \\
+        \frac{dy}{dt} = x(\rho-z)-y \\
+        \frac{dz}{dt} = xy - \beta z
+        \end{cases}
+        """)
+        
+        st.divider()
+
         col1, col2 = st.columns([1, 3])
         with col1:
-            sigma = st.slider("Sigma", 0.0, 20.0, 10.0)
-            rho = st.slider("Rho", 0.0, 50.0, 28.0)
+            st.write("#### Parámetros")
+            sigma = st.slider("Sigma (Prandtl)", 0.0, 20.0, 10.0)
+            rho = st.slider("Rho (Rayleigh)", 0.0, 50.0, 28.0)
             beta = st.slider("Beta", 0.0, 5.0, 2.66)
         
         with col2:
@@ -147,11 +180,24 @@ else:
 
     elif opcion == "Atractor de Thomas (3D)":
         st.title("Atractor de Thomas")
-        st.markdown("Atractor cíclicamente simétrico.")
+        st.markdown("""
+        ### Simetría Cíclica
+        Propuesto por **René Thomas**, este sistema es interesante por su simetría rotacional. A diferencia del de Lorenz, que tiene "dos alas", el atractor de Thomas forma una red compleja similar a una nube de trayectorias.
+        
+        El parámetro clave es la fricción $b$. Si $b$ es cercano a 0, el sistema es extremadamente caótico y llena todo el espacio.
+        """)
+        
+        st.latex(r"""
+        \begin{cases}
+        \dot{x} = \sin(y) - b x \\
+        \dot{y} = \sin(z) - b y \\
+        \dot{z} = \sin(x) - b z
+        \end{cases}
+        """)
         
         col1, col2 = st.columns([1, 3])
         with col1:
-            b = st.slider("Beta (b)", 0.0, 1.0, 0.205)
+            b = st.slider("Fricción (b)", 0.0, 1.0, 0.205)
             paleta = st.selectbox("Color", ("Ice", "Plasma", "Viridis", "Turbo"))
         
         with col2:
@@ -181,7 +227,14 @@ else:
     # ---------------------------------------
     elif opcion == "Conjunto de Mandelbrot":
         st.title("Conjunto de Mandelbrot")
-        st.markdown(r"Frontera del conjunto $z_{n+1} = z_n^2 + c$")
+        st.markdown("""
+        ### La huella digital de Dios
+        Descubierto por **Benoît Mandelbrot** en 1980, este conjunto es el objeto más famoso de las matemáticas modernas.
+        Representa un mapa de todos los conjuntos de Julia posibles. Lo asombroso es su **autosimilitud**: si haces zoom en el borde, encontrarás copias infinitas de la figura original.
+        """)
+        
+        st.latex(r"z_{n+1} = z_n^2 + c")
+        st.info("Un punto $c$ pertenece al conjunto si, al iterar la ecuación partiendo de $z=0$, el valor no tiende a infinito.")
         
         col1, col2 = st.columns([1, 3])
         with col1:
@@ -202,7 +255,7 @@ else:
                     z[diverge] = 2                           
                 return divtime
 
-            with st.spinner('Calculando...'):
+            with st.spinner('Calculando fractal...'):
                 plt.figure(figsize=(10, 10), facecolor='#0E1117')
                 fractal = mandelbrot(resolucion, resolucion, iteraciones)
                 plt.imshow(fractal, cmap='magma', extent=[-2, 0.8, -1.4, 1.4])
@@ -210,14 +263,15 @@ else:
                 st.pyplot(plt)
 
     # ---------------------------------------
-    # CUENCAS DE ATRACCIÓN (Placeholder)
+    # CUENCAS DE ATRACCIÓN
     # ---------------------------------------
     elif opcion == "Fractal de Newton (Próximamente)":
         st.title("Fractal de Newton")
-        st.info("🚧 Esta sección está en construcción.")
         st.markdown("""
-        Aquí visualizaremos las **Cuencas de Atracción**: regiones del plano complejo que convergen a diferentes raíces de un polinomio.
+        ### Método de Newton-Raphson
+        Este fractal surge al intentar encontrar las raíces de un polinomio (soluciones donde la ecuación vale cero) usando un método numérico iterativo.
         
-        *Próximamente implementaremos el método de Newton-Raphson para $z^3 - 1 = 0$.*
+        Dependiendo de dónde empieces en el plano complejo, el punto acabará convergiendo a una raíz u otra. El "mapa" de qué punto va a qué raíz crea fronteras fractales increíblemente bellas.
         """)
-
+        st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
+        st.info("🚧 Sección en construcción.")
