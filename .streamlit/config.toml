@@ -1,0 +1,15 @@
+[theme]
+# Color principal (Botones, sliders, enlaces)
+primaryColor = "#00FFCC"
+
+# Color de fondo de la página
+backgroundColor = "#0E1117"
+
+# Color de fondo de la barra lateral
+secondaryBackgroundColor = "#262730"
+
+# Color del texto
+textColor = "#FAFAFA"
+
+# Tipo de letra (sans serif, serif, o monospace)
+font = "monospace"
