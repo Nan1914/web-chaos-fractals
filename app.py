@@ -1,7 +1,24 @@
+
+import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go # Nueva librería para 3D
+
+# --- Configuración General ---
+st.set_page_config(page_title="Sistemas Dinámicos", page_icon="🌀", layout="wide")
+# CSS para ocultar el menú superior y el footer de "Made with Streamlit"
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # ==========================================
 # 1. BARRA LATERAL (NAVEGACIÓN)
 # ==========================================
-st.sidebar.title("🌀 Navegación")
+st.sidebar.title("🌀 Explora el CAOS")
 
 # -- Categoría Principal --
 categoria = st.sidebar.radio(
@@ -203,3 +220,4 @@ else:
         
         *Próximamente implementaremos el método de Newton-Raphson para $z^3 - 1 = 0$.*
         """)
+
