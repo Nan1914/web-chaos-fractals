@@ -170,7 +170,7 @@ else:
             )
         
             st.plotly_chart(fig, use_container_width=True)
-        pass
+
     
     elif opcion == "Atractor de Thomas (3D)":
             # ==========================================
@@ -232,7 +232,7 @@ else:
             )
         
             st.plotly_chart(fig, use_container_width=True)
-        pass
+
         
     elif opcion == "Conjunto de Mandelbrot":
             # ==========================================
@@ -282,7 +282,6 @@ else:
                     plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
                     plt.margins(0,0)
                     st.pyplot(plt)
-        pass
 
 
 
