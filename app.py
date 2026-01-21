@@ -1,11 +1,16 @@
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go # Nueva librería para 3D
 
+
 # --- Configuración General ---
-st.set_page_config(page_title="Sistemas Dinámicos", page_icon="🌀", layout="wide")
+st.set_page_config(
+    page_title="El Laboratorio del CAOS",
+    page_icon="🌀",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 # CSS para ocultar el menú superior y el footer de "Made with Streamlit"
 hide_streamlit_style = """
 <style>
@@ -15,21 +20,13 @@ footer {visibility: hidden;}
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# --- Configuración General ---
-st.set_page_config(
-    page_title="El Laboratorio del Caos",
-    page_icon="🌀",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 # ==========================================
 # 1. BARRA LATERAL (NAVEGACIÓN)
 # ==========================================
-st.sidebar.title("🌀 Experimenta el CAOS")
+st.sidebar.title("🌀 Explora el CAOS")
 
 categoria = st.sidebar.radio(
-    "📂 Categoría:",
+    "Categoría:",
     ["Sistemas Dinámicos", "Fractales", "Cuencas de Atracción"]
 )
 
@@ -57,7 +54,7 @@ elif categoria == "Cuencas de Atracción":
 
 # -- Sección de Referencias --
 st.sidebar.markdown("---")
-st.sidebar.write("### ℹ️ Info")
+st.sidebar.write("### Referencias")
 mostrar_referencias = st.sidebar.checkbox("Ver Bibliografía")
 
 
@@ -155,6 +152,7 @@ else:
             sigma = st.slider("Sigma (Prandtl)", 0.0, 20.0, 10.0)
             rho = st.slider("Rho (Rayleigh)", 0.0, 50.0, 28.0)
             beta = st.slider("Beta", 0.0, 5.0, 2.66)
+            paleta = st.selectbox("Color", ("Viridis", "Ice", "Plasma", "Turbo"))
         
         with col2:
             dt = 0.01
@@ -169,7 +167,7 @@ else:
 
             fig = go.Figure(data=go.Scatter3d(
                 x=xs, y=ys, z=zs, mode='lines',
-                line=dict(color=zs, colorscale='Viridis', width=2), opacity=0.8
+                line=dict(color=zs, colorscale=paleta, width=2), opacity=0.8
             ))
             fig.update_layout(
                 margin=dict(l=0, r=0, b=0, t=0),
@@ -198,7 +196,7 @@ else:
         col1, col2 = st.columns([1, 3])
         with col1:
             b = st.slider("Fricción (b)", 0.0, 1.0, 0.205)
-            paleta = st.selectbox("Color", ("Ice", "Plasma", "Viridis", "Turbo"))
+            paleta = st.selectbox("Color", ("Viridis", "Ice", "Plasma", "Turbo"))
         
         with col2:
             dt = 0.05
