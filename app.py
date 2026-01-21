@@ -10,7 +10,7 @@ st.set_page_config(page_title="Sistemas Dinámicos", page_icon="🌀", layout="w
 st.sidebar.title("Explora el CAOS")
 opcion = st.sidebar.selectbox(
     "Elige el sistema:",
-    ("Mapa Logístico (2D)", "Atractor de Lorenz (3D)", "Atractor de Thomas (3D)")
+    ("Mapa Logístico (2D)", "Atractor de Lorenz (3D)", "Atractor de Thomas (3D)", "Conjunto de Mandelbrot", "Referencias")
 )
 
 st.sidebar.divider()
@@ -172,3 +172,77 @@ elif opcion == "Atractor de Thomas (3D)":
     )
 
     st.plotly_chart(fig, use_container_width=True)
+    # ==========================================
+# OPCIÓN 4: CONJUNTO DE MANDELBROT
+# ==========================================
+elif opcion == "Conjunto de Mandelbrot":
+    st.title("El Conjunto de Mandelbrot")
+    st.markdown("El fractal más famoso. La frontera del conjunto es infinitamente compleja.")
+    st.latex(r"z_{n+1} = z_n^2 + c")
+
+    col1, col2 = st.columns([1, 3])
+
+    with col1:
+        st.write("### Parámetros")
+        # Menor resolución para que sea rápido en la web
+        resolucion = st.slider("Resolución (px)", 200, 1000, 500) 
+        iteraciones = st.slider("Profundidad (Iteraciones)", 20, 200, 50)
+        
+        st.info("Nota: A mayor resolución, más tardará en generarse.")
+
+    with col2:
+        # Función optimizada con NumPy (Vectorización)
+        def mandelbrot(h, w, max_iter):
+            # Crear una rejilla de números complejos
+            y, x = np.ogrid[-1.4:1.4:h*1j, -2:0.8:w*1j]
+            c = x + y*1j
+            z = c
+            divtime = max_iter + np.zeros(z.shape, dtype=int)
+
+            for i in range(max_iter):
+                z = z**2 + c
+                diverge = z*np.conj(z) > 2**2            
+                div_now = diverge & (divtime == max_iter)  
+                divtime[div_now] = i                     
+                z[diverge] = 2                           
+
+            return divtime
+
+        with st.spinner('Calculando fractal...'):
+            plt.figure(figsize=(10, 10))
+            # Calculamos el fractal
+            fractal = mandelbrot(resolucion, resolucion, iteraciones)
+            
+            # Visualización
+            plt.imshow(fractal, cmap='magma', extent=[-2, 0.8, -1.4, 1.4])
+            plt.axis('off')
+            # Truco para quitar bordes blancos
+            plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+            plt.margins(0,0)
+            st.pyplot(plt)
+
+# ==========================================
+# OPCIÓN Final: REFERENCIAS
+# ==========================================
+elif opcion == "Referencias":
+    st.title("📚 Bibliografía y Recursos")
+    st.markdown("Si te interesa profundizar en estos temas, aquí tienes los recursos esenciales:")
+    
+    st.subheader("Libros Clásicos")
+    st.markdown("""
+    * **"Caos: La creación de una ciencia"** - *James Gleick*. (El libro divulgativo por excelencia).
+    * **"Nonlinear Dynamics and Chaos"** - *Steven Strogatz*. (La biblia técnica para estudiantes).
+    * **"The Fractal Geometry of Nature"** - *Benoît Mandelbrot*. (El libro original del padre de los fractales).
+    """)
+    
+    st.divider()
+    
+    st.subheader("Librerías de Python utilizadas")
+    st.code("""
+    import streamlit as st   # Interfaz Web
+    import numpy as np       # Cálculo numérico
+    import matplotlib.pyplot # Gráficos 2D
+    import plotly            # Gráficos 3D
+    """)
+    
+    st.info("Esta web ha sido creada con asistencia de IA y Python.")
