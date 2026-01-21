@@ -1,294 +1,205 @@
-import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-
-# --- Configuración General ---
-st.set_page_config(page_title="Caos y Fractales", page_icon="🌀", layout="wide")
-
 # ==========================================
-# BARRA LATERAL (SIDEBAR) MEJORADA
+# 1. BARRA LATERAL (NAVEGACIÓN)
 # ==========================================
-st.sidebar.title("🌀 Menú Principal")
+st.sidebar.title("🌀 Navegación")
 
-# 1. SELECCIÓN DE CATEGORÍA
+# -- Categoría Principal --
 categoria = st.sidebar.radio(
-    "Elige una categoría:",
-    ["Sistemas Dinámicos", "Fractales"]
+    "📂 Categoría:",
+    ["Sistemas Dinámicos", "Fractales", "Cuencas de Atracción"]
 )
 
-# 2. SELECCIÓN DE EXPERIMENTO (Depende de la categoría)
-opcion = "" # Inicializamos la variable
+st.sidebar.markdown("---")
+
+# -- Sub-Menú (Depende de la categoría) --
+opcion = ""
 
 if categoria == "Sistemas Dinámicos":
     opcion = st.sidebar.selectbox(
-        "Selecciona el sistema:",
+        "Experimento:",
         ("Mapa Logístico (2D)", "Atractor de Lorenz (3D)", "Atractor de Thomas (3D)")
     )
+    
 elif categoria == "Fractales":
     opcion = st.sidebar.selectbox(
-        "Selecciona el fractal:",
-        ("Conjunto de Mandelbrot",) # Nota la coma, es una tupla
+        "Experimento:",
+        ("Conjunto de Mandelbrot",)
     )
 
-# 3. SECCIÓN "APARTE" (Referencias)
-st.sidebar.markdown("---") # Línea separadora
-st.sidebar.write("### ℹ️ Info Extra")
+elif categoria == "Cuencas de Atracción":
+    opcion = st.sidebar.selectbox(
+        "Experimento:",
+        ("Fractal de Newton (Próximamente)",)
+    )
 
-# Usamos un checkbox para "activar" las referencias sin perder la navegación
-mostrar_referencias = st.sidebar.checkbox("Ver Referencias y Bibliografía")
+# -- Sección de Referencias (Fija abajo) --
+st.sidebar.markdown("---")
+st.sidebar.write("### ℹ️ Info")
+mostrar_referencias = st.sidebar.checkbox("Ver Bibliografía")
+
 
 # ==========================================
-# LÓGICA DE VISUALIZACIÓN
+# 2. LÓGICA DE VISUALIZACIÓN
 # ==========================================
 
-# Si el usuario marca el checkbox, mostramos SOLO las referencias
-# ==========================================
-# OPCIÓN Final: REFERENCIAS
-# ==========================================
+# CASO A: El usuario quiere ver las Referencias
 if mostrar_referencias:
     st.title("📚 Bibliografía y Recursos")
-    st.markdown("Si te interesa profundizar en estos temas, aquí tienes los recursos esenciales:")
+    st.markdown("Recursos esenciales para entender el caos y la complejidad.")
     
-    st.subheader("Libros Clásicos")
-    st.markdown("""
-    * **"Caos: La creación de una ciencia"** - *James Gleick*. (El libro divulgativo por excelencia).
-    * **"Nonlinear Dynamics and Chaos"** - *Steven Strogatz*. (La biblia técnica para estudiantes).
-    * **"The Fractal Geometry of Nature"** - *Benoît Mandelbrot*. (El libro original del padre de los fractales).
-    """)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Textos Fundamentales")
+        st.markdown("""
+        * **James Gleick** - *Caos: La creación de una ciencia*.
+        * **Steven Strogatz** - *Nonlinear Dynamics and Chaos*.
+        * **Benoît Mandelbrot** - *The Fractal Geometry of Nature*.
+        """)
     
-    st.divider()
+    with col2:
+        st.subheader("Conceptos Clave")
+        st.markdown("""
+        * **Atractor Extraño:** Un conjunto de puntos hacia donde evoluciona un sistema caótico.
+        * **Autosemejanza:** Patrones que se repiten a diferentes escalas.
+        * **Efecto Mariposa:** Sensibilidad extrema a las condiciones iniciales.
+        """)
     
-    st.subheader("Librerías de Python utilizadas")
-    st.code("""
-    import streamlit as st   # Interfaz Web
-    import numpy as np       # Cálculo numérico
-    import matplotlib.pyplot # Gráficos 2D
-    import plotly            # Gráficos 3D
-    """)
-    
-    st.info("Esta web ha sido creada con asistencia de IA y Python.")
+    st.info("Desmarca la casilla 'Ver Bibliografía' en la barra lateral para volver a los gráficos.")
 
-
-
-# Si NO está marcado, mostramos el experimento seleccionado arriba
+# CASO B: Visualización de Experimentos
 else:
-    # AQUI EMPIEZAN TUS IF/ELIF ORIGINALES
+    # ---------------------------------------
+    # SISTEMAS DINÁMICOS
+    # ---------------------------------------
     if opcion == "Mapa Logístico (2D)":
-        # ==========================================
-        # OPCIÓN 1: MAPA LOGÍSTICO (Tu código anterior mejorado)
-        # ==========================================
-            st.title("El Mapa Logístico")
-            st.markdown("Visualizando la ruta hacia el caos en: $x_{n+1} = r x_n (1 - x_n)$")
-            
-            col1, col2 = st.columns([1, 3]) # Dividimos la pantalla
-            
-            with col1:
-                st.info("Controles")
-                n_iter = st.slider("Iteraciones", 500, 2000, 1000)
-                r_range = st.slider("Rango de r", 2.5, 4.0, (2.5, 4.0)) # Slider doble
-                
-            with col2:
-                # Lógica de cálculo
-                r = np.linspace(r_range[0], r_range[1], 1000)
-                x = 1e-5 * np.ones(1000)
-                
-                # Pre-calentamiento
-                for i in range(100): 
-                    x = r * x * (1 - x)
-                    
-                fig, ax = plt.subplots(figsize=(10, 6))
-                fig.patch.set_facecolor('#0E1117')
-                ax.set_facecolor('#0E1117')
-                
-                # Ciclo principal
-                for i in range(n_iter):
-                    x = r * x * (1 - x)
-                    ax.scatter(r, x, s=0.1, c='cyan', alpha=0.1)
-                    
-                ax.axis('off') # Quitamos ejes para hacerlo más artístico/minimalista
-                st.pyplot(fig)
+        st.title("El Mapa Logístico")
+        st.markdown(r"Ecuación: $x_{n+1} = r x_n (1 - x_n)$")
         
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            n_iter = st.slider("Iteraciones", 500, 2000, 1000)
+            r_range = st.slider("Rango de r", 2.5, 4.0, (2.5, 4.0))
+        
+        with col2:
+            r = np.linspace(r_range[0], r_range[1], 1000)
+            x = 1e-5 * np.ones(1000)
+            for i in range(100): x = r * x * (1 - x) # Transitorio
+            
+            fig, ax = plt.subplots(figsize=(10, 6))
+            fig.patch.set_facecolor('#0E1117')
+            ax.set_facecolor('#0E1117')
+            
+            for i in range(n_iter):
+                x = r * x * (1 - x)
+                ax.scatter(r, x, s=0.1, c='cyan', alpha=0.1)
+            
+            ax.axis('off')
+            st.pyplot(fig)
+
     elif opcion == "Atractor de Lorenz (3D)":
-        # ==========================================
-        # OPCIÓN 2: ATRACTOR DE LORENZ (Nuevo código 3D)
-        # ==========================================
-            st.title("Atractor de Lorenz")
-            st.markdown(r"""
-            El sistema clásico de ecuaciones diferenciales:
-            $$
-            \begin{cases}
-            \frac{dx}{dt} = \sigma(y-x) \\
-            \frac{dy}{dt} = x(\rho-z)-y \\
-            \frac{dz}{dt} = xy - \beta z
-            \end{cases}
-            $$
-            """)
+        st.title("Atractor de Lorenz")
+        st.markdown(r"El sistema clásico de convección atmosférica.")
         
-            # Parámetros en el sidebar específicos para Lorenz
-            st.sidebar.header("Parámetros de Lorenz")
-            sigma = st.sidebar.slider("Sigma (σ)", 0.0, 20.0, 10.0)
-            rho = st.sidebar.slider("Rho (ρ)", 0.0, 50.0, 28.0)
-            beta = st.sidebar.slider("Beta (β)", 0.0, 5.0, 2.66)
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            sigma = st.slider("Sigma", 0.0, 20.0, 10.0)
+            rho = st.slider("Rho", 0.0, 50.0, 28.0)
+            beta = st.slider("Beta", 0.0, 5.0, 2.66)
         
-                # NUEVO: Selector de Paleta de Color
-            paleta = st.sidebar.selectbox(
-                "Paleta de Color",
-                ("Viridis", "Ice", "Plasma", "Inferno", "Turbo", "Twilight")
-            )
-        
-            # Cálculo de la trayectoria (Método de Euler simple)
+        with col2:
             dt = 0.01
             num_steps = 10000
-            
             xs, ys, zs = np.empty(num_steps), np.empty(num_steps), np.empty(num_steps)
-            xs[0], ys[0], zs[0] = (0.1, 1.0, 1.05) # Punto inicial
-        
+            xs[0], ys[0], zs[0] = (0.1, 1.0, 1.05)
+
             for i in range(num_steps - 1):
                 xs[i+1] = xs[i] + (sigma * (ys[i] - xs[i])) * dt
                 ys[i+1] = ys[i] + (xs[i] * (rho - zs[i]) - ys[i]) * dt
                 zs[i+1] = zs[i] + (xs[i] * ys[i] - beta * zs[i]) * dt
-        
-            # Visualización Interactiva con Plotly
+
             fig = go.Figure(data=go.Scatter3d(
-                x=xs, y=ys, z=zs,
-                mode='lines',
-                line=dict(color=zs, colorscale= paleta, width=2), # El color depende de la altura Z
-                opacity=0.8
+                x=xs, y=ys, z=zs, mode='lines',
+                line=dict(color=zs, colorscale='Viridis', width=2), opacity=0.8
             ))
-        
             fig.update_layout(
                 margin=dict(l=0, r=0, b=0, t=0),
-                scene=dict(
-                    xaxis=dict(visible=False),
-                    yaxis=dict(visible=False),
-                    zaxis=dict(visible=False),
-                    bgcolor='#0E1117'
-                ),
                 paper_bgcolor='#0E1117',
-                height=600
+                scene=dict(bgcolor='#0E1117', xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False))
             )
-        
             st.plotly_chart(fig, use_container_width=True)
 
-    
     elif opcion == "Atractor de Thomas (3D)":
-            # ==========================================
-            # OPCIÓN 3: ATRACTOR DE THOMAS (Con selector de color)
-            # ==========================================
-            st.title("Atractor de Thomas")
-            st.markdown("Un atractor cíclicamente simétrico generado por ecuaciones senoidales. Las ecuaciones diferenciales que describen este sistema son:")
-            st.latex(r"""
-            \begin{cases}
-            \dot{x} = \sin(y) - b x \\
-            \dot{y} = \sin(z) - b y \\
-            \dot{z} = \sin(x) - b z
-            \end{cases}
-            """)
+        st.title("Atractor de Thomas")
+        st.markdown("Atractor cíclicamente simétrico.")
         
-            # --- Sidebar ---
-            st.sidebar.header("Parámetros Thomas")
-            b = st.sidebar.slider("Beta (b)", 0.0, 1.0, 0.205, step=0.001)
-            n_steps = st.sidebar.slider("Número de puntos", 10000, 50000, 25000)
-            
-            # NUEVO: Selector de Paleta de Color
-            paleta = st.sidebar.selectbox(
-                "Paleta de Color",
-                ("Viridis", "Ice", "Plasma", "Inferno", "Turbo", "Twilight")
-            )
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            b = st.slider("Beta (b)", 0.0, 1.0, 0.205)
+            paleta = st.selectbox("Color", ("Ice", "Plasma", "Viridis", "Turbo"))
         
-            # --- Cálculo (Euler) ---
+        with col2:
             dt = 0.05
+            n_steps = 25000
             xs, ys, zs = np.empty(n_steps), np.empty(n_steps), np.empty(n_steps)
             xs[0], ys[0], zs[0] = (0.1, 0, 0) 
-        
+
             for i in range(n_steps - 1):
                 xs[i+1] = xs[i] + (np.sin(ys[i]) - b * xs[i]) * dt
                 ys[i+1] = ys[i] + (np.sin(zs[i]) - b * ys[i]) * dt
                 zs[i+1] = zs[i] + (np.sin(xs[i]) - b * zs[i]) * dt
-        
-            # --- Visualización ---
+
             fig = go.Figure(data=go.Scatter3d(
-                x=xs, y=ys, z=zs,
-                mode='lines',
-                line=dict(
-                    color=xs+ys+zs,  # El color cambia según la posición en el espacio
-                    colorscale=paleta, # <--- AQUÍ USAMOS LA SELECCIÓN DEL USUARIO
-                    width=1.5
-                ),
-                opacity=0.6
+                x=xs, y=ys, z=zs, mode='lines',
+                line=dict(color=xs+ys+zs, colorscale=paleta, width=1.5), opacity=0.6
             ))
-        
             fig.update_layout(
                 margin=dict(l=0, r=0, b=0, t=0),
-                scene=dict(
-                    xaxis=dict(visible=False),
-                    yaxis=dict(visible=False),
-                    zaxis=dict(visible=False),
-                    bgcolor='#0E1117'
-                ),
                 paper_bgcolor='#0E1117',
-                height=600
+                scene=dict(bgcolor='#0E1117', xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False))
             )
-        
             st.plotly_chart(fig, use_container_width=True)
 
-        
+    # ---------------------------------------
+    # FRACTALES
+    # ---------------------------------------
     elif opcion == "Conjunto de Mandelbrot":
-            # ==========================================
-            # OPCIÓN 4: CONJUNTO DE MANDELBROT
-            # ==========================================
-            st.title("El Conjunto de Mandelbrot")
-            st.markdown("El fractal más famoso. La frontera del conjunto es infinitamente compleja.")
-            st.latex(r"z_{n+1} = z_n^2 + c")
+        st.title("Conjunto de Mandelbrot")
+        st.markdown(r"Frontera del conjunto $z_{n+1} = z_n^2 + c$")
         
-            col1, col2 = st.columns([1, 3])
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            resolucion = st.slider("Resolución", 200, 800, 400)
+            iteraciones = st.slider("Iteraciones", 20, 100, 50)
         
-            with col1:
-                st.write("### Parámetros")
-                # Menor resolución para que sea rápido en la web
-                resolucion = st.slider("Resolución (px)", 200, 1000, 500) 
-                iteraciones = st.slider("Profundidad (Iteraciones)", 20, 200, 50)
-                
-                st.info("Nota: A mayor resolución, más tardará en generarse.")
+        with col2:
+            def mandelbrot(h, w, max_iter):
+                y, x = np.ogrid[-1.4:1.4:h*1j, -2:0.8:w*1j]
+                c = x + y*1j
+                z = c
+                divtime = max_iter + np.zeros(z.shape, dtype=int)
+                for i in range(max_iter):
+                    z = z**2 + c
+                    diverge = z*np.conj(z) > 2**2            
+                    div_now = diverge & (divtime == max_iter)  
+                    divtime[div_now] = i                     
+                    z[diverge] = 2                           
+                return divtime
+
+            with st.spinner('Calculando...'):
+                plt.figure(figsize=(10, 10), facecolor='#0E1117')
+                fractal = mandelbrot(resolucion, resolucion, iteraciones)
+                plt.imshow(fractal, cmap='magma', extent=[-2, 0.8, -1.4, 1.4])
+                plt.axis('off')
+                st.pyplot(plt)
+
+    # ---------------------------------------
+    # CUENCAS DE ATRACCIÓN (Placeholder)
+    # ---------------------------------------
+    elif opcion == "Fractal de Newton (Próximamente)":
+        st.title("Fractal de Newton")
+        st.info("🚧 Esta sección está en construcción.")
+        st.markdown("""
+        Aquí visualizaremos las **Cuencas de Atracción**: regiones del plano complejo que convergen a diferentes raíces de un polinomio.
         
-            with col2:
-                # Función optimizada con NumPy (Vectorización)
-                def mandelbrot(h, w, max_iter):
-                    # Crear una rejilla de números complejos
-                    y, x = np.ogrid[-1.4:1.4:h*1j, -2:0.8:w*1j]
-                    c = x + y*1j
-                    z = c
-                    divtime = max_iter + np.zeros(z.shape, dtype=int)
-        
-                    for i in range(max_iter):
-                        z = z**2 + c
-                        diverge = z*np.conj(z) > 2**2            
-                        div_now = diverge & (divtime == max_iter)  
-                        divtime[div_now] = i                     
-                        z[diverge] = 2                           
-        
-                    return divtime
-        
-                with st.spinner('Calculando fractal...'):
-                    plt.figure(figsize=(10, 10))
-                    # Calculamos el fractal
-                    fractal = mandelbrot(resolucion, resolucion, iteraciones)
-                    
-                    # Visualización
-                    plt.imshow(fractal, cmap='magma', extent=[-2, 0.8, -1.4, 1.4])
-                    plt.axis('off')
-                    # Truco para quitar bordes blancos
-                    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-                    plt.margins(0,0)
-                    st.pyplot(plt)
-
-
-
-
-
-
-
-
-
-
+        *Próximamente implementaremos el método de Newton-Raphson para $z^3 - 1 = 0$.*
+        """)
