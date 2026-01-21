@@ -75,7 +75,7 @@ elif opcion == "Atractor de Lorenz (3D)":
         # NUEVO: Selector de Paleta de Color
     paleta = st.sidebar.selectbox(
         "Paleta de Color",
-        ("Ice", "Plasma", "Viridis", "Inferno", "Turbo", "Twilight")
+        ("Viridis", "Ice", "Plasma", "Inferno", "Turbo", "Twilight")
     )
 
     # Cálculo de la trayectoria (Método de Euler simple)
@@ -134,7 +134,7 @@ elif opcion == "Atractor de Thomas (3D)":
     # NUEVO: Selector de Paleta de Color
     paleta = st.sidebar.selectbox(
         "Paleta de Color",
-        ("Ice", "Plasma", "Viridis", "Inferno", "Turbo", "Twilight")
+        ("Viridis", "Ice", "Plasma", "Inferno", "Turbo", "Twilight")
     )
 
     # --- Cálculo (Euler) ---
@@ -246,3 +246,4 @@ elif opcion == "Referencias":
     """)
     
     st.info("Esta web ha sido creada con asistencia de IA y Python.")
+
