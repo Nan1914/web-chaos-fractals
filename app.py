@@ -329,7 +329,7 @@ else:
                 
                 basins = duffing_basins_paper_style(resolucion, delta, t_max, F, omega)
                 
-                plt.imshow(basins, cmap='hsv', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
+                plt.imshow(basins, cmap='turbo', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
                 
                 plt.title(f"Duffing Fractal ($\delta={delta:.2f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
                 plt.xlabel('$x$', color='white', fontsize=14)
@@ -361,6 +361,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
