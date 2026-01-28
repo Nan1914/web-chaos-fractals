@@ -285,72 +285,93 @@ else:
         
         with col1:
             st.write("#### Parámetros")
-            delta = st.slider("Amortiguamiento ($\delta$)", 0.0, 0.5, 0.05, step=0.005, format="%.3f")
+            delta = st.slider("Amortiguamiento ($\delta$)", 0.0, 0.5, 0.050, step=0.001, format="%.3f")
             F = st.slider("Fuerza externa (F)", 0.0, 0.5, 0.098, step=0.001, format="%.3f")
             omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.15, step=0.01)
             
             st.divider()
-            resolucion = st.slider("Resolución (px)", 200, 800, 600)
+            resolucion = st.slider("Resolución (px)", 100, 600, 400)
             t_max = st.slider("Tiempo simulación", 50, 200, 100)
             
-            st.info("""
-            **Aviso:** Con alta resolución y tiempo largo, el cálculo puede tardar. ¡Paciencia!
-            """)
+            st.info("Usando integrador RK4 para evitar la pantalla negra.")
 
         with col2:
-            def duffing_basins_paper_style(res, delta, time_steps, F, omega):
-                # 1. Ajustamos el rango visual al del paper
-                x = np.linspace(-2, 2, res)
-                y = np.linspace(-2, 2, res)
+            # Función optimizada con Runge-Kutta 4
+            def duffing_basins_rk4(res, delta, time_steps, F, omega):
+                # 1. Coordenadas iniciales
+                x = np.linspace(-2.5, 2.5, res)
+                y = np.linspace(-2.5, 2.5, res)
                 X, Y = np.meshgrid(x, y)
                 
-                # 2. MEJORA CLAVE: Paso de tiempo más fino para estabilidad
-                dt = 0.01  
+                # Paso de tiempo y número de pasos
+                dt = 0.05 # RK4 permite pasos más grandes sin explotar
                 steps = int(time_steps / dt)
-                t = 0.0 
+                t = 0.0
                 
-                # Bucle de evolución temporal
+                # Definimos las ecuaciones del sistema para RK4
+                # dx/dt = y
+                # dy/dt = x - x^3 - delta*y + F*cos(omega*t)
+                
                 for _ in range(steps):
-                    Y_new = Y + (X - X**3 - delta * Y + F * np.cos(omega * t)) * dt
-                    X_new = X + Y_new * dt
+                    # Paso 1
+                    k1_x = Y
+                    k1_y = X - X**3 - delta * Y + F * np.cos(omega * t)
                     
-                    X, Y = X_new, Y_new
+                    # Paso 2
+                    t_half = t + 0.5 * dt
+                    X_half = X + 0.5 * k1_x * dt
+                    Y_half = Y + 0.5 * k1_y * dt
+                    k2_x = Y_half
+                    k2_y = X_half - X_half**3 - delta * Y_half + F * np.cos(omega * t_half)
                     
-                    # 3. Relajamos el límite de escape (de 50 a 1000)
-                    # Si restringimos mucho, borramos trayectorias válidas que solo "daban un paseo"
-                    mask = (X**2 + Y**2 < 1000) 
-                    X[~mask] = np.nan
-                    Y[~mask] = np.nan
+                    # Paso 3
+                    X_half_2 = X + 0.5 * k2_x * dt
+                    Y_half_2 = Y + 0.5 * k2_y * dt
+                    k3_x = Y_half_2
+                    k3_y = X_half_2 - X_half_2**3 - delta * Y_half_2 + F * np.cos(omega * t_half)
                     
-                    t += dt 
-                
-                # Calculamos el ángulo final
-                basins_angle = np.arctan2(Y, X)
-                return basins_angle
+                    # Paso 4
+                    t_next = t + dt
+                    X_next = X + k3_x * dt
+                    Y_next = Y + k3_y * dt
+                    k4_x = Y_next
+                    k4_y = X_next - X_next**3 - delta * Y_next + F * np.cos(omega * t_next)
+                    
+                    # Actualización final
+                    X = X + (dt / 6.0) * (k1_x + 2*k2_x + 2*k3_x + k4_x)
+                    Y = Y + (dt / 6.0) * (k1_y + 2*k2_y + 2*k3_y + k4_y)
+                    t = t_next
 
-            with st.spinner('Simulando caos (esto puede tardar un poco por la precisión extra)...'):
-                # Crear figura con fondo oscuro
-                fig = plt.figure(figsize=(10, 10), facecolor='#0E1117')
+                    # Máscara de seguridad (más permisiva) para evitar números infinitos
+                    # Solo borramos si se van REALMENTE lejos
+                    mask_limit = 1e4
+                    too_large = (X**2 + Y**2 > mask_limit)
+                    X[too_large] = np.nan
+                    Y[too_large] = np.nan
                 
-                # Calcular
-                basins = duffing_basins_paper_style(resolucion, delta, t_max, F, omega)
+                # Devolvemos el ángulo de fase (-pi a pi)
+                return np.arctan2(Y, X)
+
+            with st.spinner('Integrando trayectorias con RK4...'):
+                fig, ax = plt.subplots(figsize=(8, 8))
                 
-                # Visualizar: 'twilight' es excelente para ángulos porque es cíclico
-                # Usamos interpolation='nearest' para que los píxeles se vean nítidos
-                plt.imshow(basins, cmap='twilight', extent=[-2, 2, -2, 2], origin='lower', interpolation='nearest')
-                
-                plt.title(f"Duffing Fractal ($\delta={delta:.3f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
-                plt.xlabel('$x$', color='white', fontsize=14)
-                plt.ylabel('$\dot{x}$', color='white', fontsize=14)
-                
-                # Estilo oscuro para ejes
-                ax = plt.gca()
+                # Configuramos colores oscuros manualmente para asegurar que se vea
+                fig.patch.set_facecolor('#0E1117')
                 ax.set_facecolor('#0E1117')
-                ax.tick_params(axis='x', colors='white')
-                ax.tick_params(axis='y', colors='white')
+                
+                basins = duffing_basins_rk4(resolucion, delta, t_max, F, omega)
+                
+                # Importante: vmin y vmax aseguran que el mapa de color cubra todo el rango
+                im = ax.imshow(basins, cmap='twilight', extent=[-2.5, 2.5, -2.5, 2.5], 
+                               origin='lower', interpolation='nearest', vmin=-np.pi, vmax=np.pi)
+                
+                ax.set_title(f"Duffing RK4 ($\delta={delta:.3f}, F={F:.3f}$)", color='white')
+                ax.set_xlabel('x', color='white')
+                ax.set_ylabel('dx/dt', color='white')
+                
+                ax.tick_params(colors='white')
                 for spine in ax.spines.values(): spine.set_color('white')
                 
-                plt.tight_layout()
                 st.pyplot(fig)
  
     elif opcion == "Fractal de Newton (Próximamente)":
@@ -363,6 +384,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
