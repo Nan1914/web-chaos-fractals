@@ -265,85 +265,91 @@ else:
     # ---------------------------------------
     # CUENCAS DE ATRACCIÓN
     # ---------------------------------------
+
     elif opcion == "Oscilador de Duffing":
-        st.title("Oscilador de Duffing")
+        st.title("Cuencas Fractales de Duffing")
         st.markdown("""
         ### El mapa del Doble Pozo con Forzamiento
         Visualizamos la evolución de un sistema con dos estados estables excitado externamente.
         La ecuación incluye ahora un término de forzamiento periódico $F \cos(\omega t)$.
         
         * **Espirales:** Al añadir fuerza externa y variar la fricción, las fronteras entre las cuencas se vuelven fractales complejos.
+        
+        * **Colores:** Indican la fase final (ángulo) en el espacio de fases, revelando la compleja estructura espiral de los atractores.
+        * **Parámetros del artículo:** $\delta=0.05, F=0.098, \omega=1.15$.
         """)
         
-        # Ecuación actualizada con el término de tiempo
         st.latex(r"\ddot{x} + \delta \dot{x} - x + x^3 = F \cos(\omega t)")
         
         col1, col2 = st.columns([1, 3])
         
         with col1:
             st.write("#### Parámetros")
-            delta = st.slider("Amortiguamiento ($\delta$)", 0.0, 1.0, 0.20, step=0.01)
-            F = st.slider("Fuerza externa (F)", 0.0, 1.0, 0.30, step=0.01)
-            omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.0, step=0.05)
+            # Valores por defecto ajustados a los del artículo
+            delta = st.slider("Amortiguamiento ($\delta$)", 0.0, 0.5, 0.05, step=0.005, format="%.3f")
+            F = st.slider("Fuerza externa (F)", 0.0, 0.5, 0.098, step=0.001, format="%.3f")
+            omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.15, step=0.01)
             
             st.divider()
-            resolucion = st.slider("Resolución", 200, 600, 400)
-            t_max = st.slider("Tiempo simulación", 10, 100, 30)
+            # Más resolución y tiempo por defecto para que se vea bien
+            resolucion = st.slider("Resolución (px)", 200, 800, 500)
+            t_max = st.slider("Tiempo simulación", 50, 200, 100)
             
             st.info("""
-            **Nota:**
-            Si $F=0$, el sistema es autónomo. Si $F > 0$, las cuencas dependen del tiempo.
+            **Aviso:** Con alta resolución y tiempo largo, el cálculo puede tardar unos segundos. ¡Paciencia, el resultado merece la pena!
             """)
 
         with col2:
-            # 1. AÑADIMOS F y OMEGA A LA FUNCIÓN
-            def duffing_basins(res, delta, time_steps, F, omega):
-                # Rejilla inicial
-                x = np.linspace(-2, 2, res)
-                y = np.linspace(-2, 2, res)
+            def duffing_basins_paper_style(res, delta, time_steps, F, omega):
+                # Rejilla inicial un poco más amplia
+                x = np.linspace(-2.5, 2.5, res)
+                y = np.linspace(-2.5, 2.5, res)
                 X, Y = np.meshgrid(x, y)
                 
-                dt = 0.05
+                dt = 0.05 # Paso de tiempo
                 steps = int(time_steps / dt)
-                
-                # 2. INICIALIZAMOS EL TIEMPO
                 t = 0.0 
                 
-                # Bucle de evolución temporal
+                # Bucle de evolución temporal (Método Euler-Cromer semi-implícito para mejor estabilidad)
                 for _ in range(steps):
-                    X_new = X + Y * dt
-                    
-                    # 3. ECUACIÓN CON TIEMPO (np.cos) Y PARÉNTESIS CORREGIDOS
-                    # dy/dt = x - x^3 - delta*y + F*cos(omega*t)
+                    # Calculamos la nueva velocidad primero (usando la posición vieja)
                     Y_new = Y + (X - X**3 - delta * Y + F * np.cos(omega * t)) * dt
+                    # Calculamos la nueva posición (usando la NUEVA velocidad) - Mejora estabilidad
+                    X_new = X + Y_new * dt
                     
                     X, Y = X_new, Y_new
                     
-                    # Optimización de divergencia
-                    mask = (np.abs(X) < 10) 
+                    # Límite de divergencia para evitar errores numéricos
+                    mask = (X**2 + Y**2 < 50) 
                     X[~mask] = np.nan
                     Y[~mask] = np.nan
                     
-                    # 4. ACTUALIZAMOS EL VECTOR TIEMPO
                     t += dt 
                 
-                # Clasificamos por signo de X final
-                basins = np.sign(X) 
-                return basins
+                # --- CAMBIO CLAVE DE COLOR ---
+                # En lugar de solo signo(X), usamos el ángulo de fase final (arctan2).
+                # Esto da un gradiente de colores que resalta las espirales.
+                basins_angle = np.arctan2(Y, X)
+                return basins_angle
 
-            with st.spinner('Simulando dinámica caótica...'):
+            with st.spinner('Calculando la estructura fractal...'):
                 plt.figure(figsize=(10, 10), facecolor='#0E1117')
                 
-                # Pasamos los nuevos parámetros a la función
-                basins = duffing_basins(resolucion, delta, t_max, F, omega)
+                basins = duffing_basins_paper_style(resolucion, delta, t_max, F, omega)
                 
-                plt.imshow(basins, cmap='RdYlBu', extent=[-2, 2, -2, 2], origin='lower')
+                # Usamos un mapa de colores cíclico (hsv o twilight) para los ángulos
+                plt.imshow(basins, cmap='hsv', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
                 
-                plt.title(f"Cuencas Duffing ($\delta={delta}, F={F}, \omega={omega}$)", color='white')
-                plt.xlabel('Posición Inicial ($x$)', color='white')
-                plt.ylabel('Velocidad Inicial ($v$)', color='white')
-                plt.axis('off')
+                plt.title(f"Duffing Fractal ($\delta={delta:.2f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
+                plt.xlabel('$x$', color='white', fontsize=14)
+                plt.ylabel('$\dot{x}$', color='white', fontsize=14)
                 
+                # Configuración para que parezca más una figura de artículo
+                ax = plt.gca()
+                ax.tick_params(axis='x', colors='white')
+                ax.tick_params(axis='y', colors='white')
+                for spine in ax.spines.values(): spine.set_color('white')
+
                 st.pyplot(plt)
  
     elif opcion == "Fractal de Newton (Próximamente)":
@@ -356,6 +362,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
