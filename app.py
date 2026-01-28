@@ -290,7 +290,7 @@ else:
             omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.15, step=0.01)
             
             st.divider()
-            resolucion = st.slider("Resolución (px)", 200, 800, 500)
+            resolucion = st.slider("Resolución (px)", 200, 800, 400)
             t_max = st.slider("Tiempo simulación", 50, 200, 100)
             
             st.info("""
@@ -303,7 +303,7 @@ else:
                 y = np.linspace(-2.5, 2.5, res)
                 X, Y = np.meshgrid(x, y)
                 
-                dt = 0.05
+                dt = 0.01
                 steps = int(time_steps / dt)
                 t = 0.0 
                 
@@ -314,7 +314,7 @@ else:
                     
                     X, Y = X_new, Y_new
                     
-                    mask = (X**2 + Y**2 < 50) 
+                    mask = (X**2 + Y**2 < 100) 
                     X[~mask] = np.nan
                     Y[~mask] = np.nan
                     
@@ -329,7 +329,7 @@ else:
                 
                 basins = duffing_basins_paper_style(resolucion, delta, t_max, F, omega)
                 
-                plt.imshow(basins, cmap='turbo', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
+                plt.imshow(basins, cmap='jet', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
                 
                 plt.title(f"Duffing Fractal ($\delta={delta:.2f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
                 plt.xlabel('$x$', color='white', fontsize=14)
@@ -361,6 +361,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
