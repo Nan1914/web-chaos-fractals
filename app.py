@@ -265,8 +265,8 @@ else:
     # ---------------------------------------
     # CUENCAS DE ATRACCIÓN
     # ---------------------------------------
-    elif opcion == "Cuencas de Duffing":
-        st.title("Cuencas del Oscilador de Duffing")
+    elif opcion == "Oscilador de Duffing":
+        st.title("Oscilador de Duffing")
         st.markdown("""
         ### El mapa del Doble Pozo
         Visualizamos la evolución de un sistema con dos estados estables (como dos imanes).
@@ -348,6 +348,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
