@@ -49,7 +49,7 @@ elif categoria == "Fractales":
 elif categoria == "Cuencas de Atracción":
     opcion = st.sidebar.selectbox(
         "Experimento:",
-        ("Fractal de Newton (Próximamente)",)
+        ("Oscilador de Duffing", "Fractal de Newton (Próximamente)")
     )
 
 # -- Sección de Referencias --
@@ -348,6 +348,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
