@@ -265,73 +265,81 @@ else:
     # ---------------------------------------
     # CUENCAS DE ATRACCIÓN
     # ---------------------------------------
-    elif opcion == "Oscilador de Duffing":
-        st.title("Oscilador de Duffing")
+    elif opcion == "Cuencas de Duffing":
+        st.title("Cuencas del Oscilador de Duffing")
         st.markdown("""
-        ### El mapa del Doble Pozo
-        Visualizamos la evolución de un sistema con dos estados estables (como dos imanes).
-        La ecuación describe una partícula moviéndose en un potencial con forma de "W" ($V(x) = - \frac{1}{2}x^2 + \frac{1}{4}x^4$) con fricción.
+        ### El mapa del Doble Pozo con Forzamiento
+        Visualizamos la evolución de un sistema con dos estados estables excitado externamente.
+        La ecuación incluye ahora un término de forzamiento periódico $F \cos(\omega t)$.
         
-        * **Color Amarillo:** Condiciones iniciales que acaban en el atractor derecho ($x \approx 1$).
-        * **Color Azul:** Condiciones iniciales que acaban en el atractor izquierdo ($x \approx -1$).
-        * **Frontera:** El límite entre ambos colores es un fractal.
+        * **Espirales:** Al añadir fuerza externa y variar la fricción, las fronteras entre las cuencas se vuelven fractales complejos.
         """)
         
-        st.latex(r"\ddot{x} + \delta \dot{x} - x + x^3 = 0")
+        # Ecuación actualizada con el término de tiempo
+        st.latex(r"\ddot{x} + \delta \dot{x} - x + x^3 = F \cos(\omega t)")
         
         col1, col2 = st.columns([1, 3])
         
         with col1:
             st.write("#### Parámetros")
-            delta = st.slider("Amortiguamiento ($\delta$)", 0.0, 1.0, 0.2, step=0.01)
+            delta = st.slider("Amortiguamiento ($\delta$)", 0.0, 1.0, 0.20, step=0.01)
+            F = st.slider("Fuerza externa (F)", 0.0, 1.0, 0.30, step=0.01)
+            omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.0, step=0.05)
+            
+            st.divider()
             resolucion = st.slider("Resolución", 200, 600, 400)
-            t_max = st.slider("Tiempo de simulación", 10, 50, 20)
+            t_max = st.slider("Tiempo simulación", 10, 100, 30)
             
             st.info("""
             **Nota:**
-            Un $\delta$ bajo (poca fricción) hace que la partícula rebote mucho antes de caer, creando espirales complejas.
+            Si $F=0$, el sistema es autónomo. Si $F > 0$, las cuencas dependen del tiempo.
             """)
 
         with col2:
-            # Función vectorizada para calcular toda la imagen de golpe
-            def duffing_basins(res, delta, time_steps):
-                # Crear la rejilla de condiciones iniciales (Posición vs Velocidad)
+            # 1. AÑADIMOS F y OMEGA A LA FUNCIÓN
+            def duffing_basins(res, delta, time_steps, F, omega):
+                # Rejilla inicial
                 x = np.linspace(-2, 2, res)
                 y = np.linspace(-2, 2, res)
                 X, Y = np.meshgrid(x, y)
                 
-                # Paso de tiempo para la simulación (Método de Euler simple para velocidad)
                 dt = 0.05
                 steps = int(time_steps / dt)
                 
+                # 2. INICIALIZAMOS EL TIEMPO
+                t = 0.0 
+                
                 # Bucle de evolución temporal
-                # Ecuaciones: dx/dt = y  ;  dy/dt = x - x^3 - delta*y
                 for _ in range(steps):
                     X_new = X + Y * dt
-                    Y_new = Y + (X - X**3 - delta * Y) * dt
+                    
+                    # 3. ECUACIÓN CON TIEMPO (np.cos) Y PARÉNTESIS CORREGIDOS
+                    # dy/dt = x - x^3 - delta*y + F*cos(omega*t)
+                    Y_new = Y + (X - X**3 - delta * Y + F * np.cos(omega * t)) * dt
+                    
                     X, Y = X_new, Y_new
                     
-                    # Optimización: Si los valores se disparan (inestabilidad), cortamos
+                    # Optimización de divergencia
                     mask = (np.abs(X) < 10) 
                     X[~mask] = np.nan
                     Y[~mask] = np.nan
+                    
+                    # 4. ACTUALIZAMOS EL VECTOR TIEMPO
+                    t += dt 
                 
-                # Clasificamos: ¿Dónde acabó la partícula?
-                # 1 = Pozo derecho (+1), -1 = Pozo izquierdo (-1)
+                # Clasificamos por signo de X final
                 basins = np.sign(X) 
                 return basins
 
-            with st.spinner('Simulando miles de trayectorias...'):
+            with st.spinner('Simulando dinámica caótica...'):
                 plt.figure(figsize=(10, 10), facecolor='#0E1117')
                 
-                # Calculamos
-                basins = duffing_basins(resolucion, delta, t_max)
+                # Pasamos los nuevos parámetros a la función
+                basins = duffing_basins(resolucion, delta, t_max, F, omega)
                 
-                # Visualizamos
-                # Usamos un mapa de colores divergente (Azul vs Rojo/Amarillo)
                 plt.imshow(basins, cmap='RdYlBu', extent=[-2, 2, -2, 2], origin='lower')
                 
-                plt.title(f"Cuencas de Atracción ($\delta={delta}$)", color='white')
+                plt.title(f"Cuencas Duffing ($\delta={delta}, F={F}, \omega={omega}$)", color='white')
                 plt.xlabel('Posición Inicial ($x$)', color='white')
                 plt.ylabel('Velocidad Inicial ($v$)', color='white')
                 plt.axis('off')
@@ -348,6 +356,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
