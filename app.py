@@ -285,66 +285,57 @@ else:
         
         with col1:
             st.write("#### Parámetros")
-            # Valores por defecto ajustados a los del artículo
             delta = st.slider("Amortiguamiento ($\delta$)", 0.0, 0.5, 0.05, step=0.005, format="%.3f")
             F = st.slider("Fuerza externa (F)", 0.0, 0.5, 0.098, step=0.001, format="%.3f")
             omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.15, step=0.01)
             
             st.divider()
-            # Más resolución y tiempo por defecto para que se vea bien
             resolucion = st.slider("Resolución (px)", 200, 800, 500)
             t_max = st.slider("Tiempo simulación", 50, 200, 100)
             
             st.info("""
-            **Aviso:** Con alta resolución y tiempo largo, el cálculo puede tardar unos segundos. ¡Paciencia, el resultado merece la pena!
+            **Aviso:** Con alta resolución y tiempo largo, el cálculo puede tardar. ¡Paciencia!
             """)
 
         with col2:
             def duffing_basins_paper_style(res, delta, time_steps, F, omega):
-                # Rejilla inicial un poco más amplia
                 x = np.linspace(-2.5, 2.5, res)
                 y = np.linspace(-2.5, 2.5, res)
                 X, Y = np.meshgrid(x, y)
                 
-                dt = 0.05 # Paso de tiempo
+                dt = 0.05
                 steps = int(time_steps / dt)
                 t = 0.0 
                 
-                # Bucle de evolución temporal (Método Euler-Cromer semi-implícito para mejor estabilidad)
+                # Método Euler-Cromer
                 for _ in range(steps):
-                    # Calculamos la nueva velocidad primero (usando la posición vieja)
                     Y_new = Y + (X - X**3 - delta * Y + F * np.cos(omega * t)) * dt
-                    # Calculamos la nueva posición (usando la NUEVA velocidad) - Mejora estabilidad
                     X_new = X + Y_new * dt
                     
                     X, Y = X_new, Y_new
                     
-                    # Límite de divergencia para evitar errores numéricos
                     mask = (X**2 + Y**2 < 50) 
                     X[~mask] = np.nan
                     Y[~mask] = np.nan
                     
                     t += dt 
                 
-                # --- CAMBIO CLAVE DE COLOR ---
-                # En lugar de solo signo(X), usamos el ángulo de fase final (arctan2).
-                # Esto da un gradiente de colores que resalta las espirales.
                 basins_angle = np.arctan2(Y, X)
                 return basins_angle
 
             with st.spinner('Calculando la estructura fractal...'):
-                plt.figure(figsize=(10, 10), facecolor='#0E1117')
+                # Color de fondo de la figura global
+                fig = plt.figure(figsize=(10, 10), facecolor='#0E1117')
                 
                 basins = duffing_basins_paper_style(resolucion, delta, t_max, F, omega)
                 
-                # Usamos un mapa de colores cíclico (hsv o twilight) para los ángulos
-                plt.imshow(basins, cmap='twilight', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
+                plt.imshow(basins, cmap='hsv', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
                 
                 plt.title(f"Duffing Fractal ($\delta={delta:.2f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
                 plt.xlabel('$x$', color='white', fontsize=14)
                 plt.ylabel('$\dot{x}$', color='white', fontsize=14)
                 
-                # Configuración para que parezca más una figura de artículo
+                # --- CORRECCIÓN DEL BORDE BLANCO ---
                 ax = plt.gca()
                 # 1. Forzar el color de fondo de los ejes
                 ax.set_facecolor('#0E1117')
@@ -356,7 +347,9 @@ else:
                 
                 # 2. Eliminar márgenes extra
                 plt.tight_layout()
-                st.pyplot(plt)
+
+                # Pasar la figura explícitamente ayuda a veces
+                st.pyplot(fig)
  
     elif opcion == "Fractal de Newton (Próximamente)":
         st.title("Fractal de Newton")
@@ -368,6 +361,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
