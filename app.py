@@ -108,7 +108,7 @@ else:
         col1, col2 = st.columns([1, 3])
         with col1:
             st.write("#### Controles")
-            n_iter = st.slider("Iteraciones", 500, 2000, 1000)
+            n_iter = st.slider("Iteraciones", 500, 2000, 750)
             r_range = st.slider("Rango de r", 2.5, 4.0, (2.5, 4.0))
         
         with col2:
@@ -290,7 +290,7 @@ else:
             omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.15, step=0.01)
             
             st.divider()
-            resolucion = st.slider("Resolución (px)", 100, 600, 400)
+            resolucion = st.slider("Resolución (px)", 100, 800, 600)
             t_max = st.slider("Tiempo simulación", 50, 200, 100)
             
             st.info("Usando integrador RK4 para evitar la pantalla negra.")
@@ -352,7 +352,7 @@ else:
                 # Devolvemos el ángulo de fase (-pi a pi)
                 return np.arctan2(Y, X)
 
-            with st.spinner('Integrando trayectorias con RK4...'):
+            with st.spinner('Simulando el infinito, por favor espere unos segundos...'):
                 fig, ax = plt.subplots(figsize=(8, 8))
                 
                 # Configuramos colores oscuros manualmente para asegurar que se vea
@@ -362,10 +362,10 @@ else:
                 basins = duffing_basins_rk4(resolucion, delta, t_max, F, omega)
                 
                 # Importante: vmin y vmax aseguran que el mapa de color cubra todo el rango
-                im = ax.imshow(basins, cmap='twilight', extent=[-2.5, 2.5, -2.5, 2.5], 
+                im = ax.imshow(basins, cmap='twilight_shifted', extent=[-2.5, 2.5, -2.5, 2.5], 
                                origin='lower', interpolation='nearest', vmin=-np.pi, vmax=np.pi)
                 
-                ax.set_title(f"Duffing RK4 ($\delta={delta:.3f}, F={F:.3f}$)", color='white')
+                ax.set_title(f"Duffing ($\delta={delta:.3f}, F={F:.3f}$)", color='white')
                 ax.set_xlabel('x', color='white')
                 ax.set_ylabel('dx/dt', color='white')
                 
@@ -384,6 +384,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
