@@ -297,7 +297,7 @@ else:
             **Aviso:** Con alta resolución y tiempo largo, el cálculo puede tardar. ¡Paciencia!
             """)
 
-with col2:
+        with col2:
             def duffing_basins_paper_style(res, delta, time_steps, F, omega):
                 # 1. Ajustamos el rango visual al del paper
                 x = np.linspace(-2, 2, res)
@@ -363,6 +363,7 @@ with col2:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
