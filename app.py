@@ -290,65 +290,67 @@ else:
             omega = st.slider("Frecuencia ($\omega$)", 0.0, 2.0, 1.15, step=0.01)
             
             st.divider()
-            resolucion = st.slider("Resolución (px)", 200, 800, 400)
+            resolucion = st.slider("Resolución (px)", 200, 800, 600)
             t_max = st.slider("Tiempo simulación", 50, 200, 100)
             
             st.info("""
             **Aviso:** Con alta resolución y tiempo largo, el cálculo puede tardar. ¡Paciencia!
             """)
 
-        with col2:
+with col2:
             def duffing_basins_paper_style(res, delta, time_steps, F, omega):
-                x = np.linspace(-2.5, 2.5, res)
-                y = np.linspace(-2.5, 2.5, res)
+                # 1. Ajustamos el rango visual al del paper
+                x = np.linspace(-2, 2, res)
+                y = np.linspace(-2, 2, res)
                 X, Y = np.meshgrid(x, y)
                 
-                dt = 0.01
+                # 2. MEJORA CLAVE: Paso de tiempo más fino para estabilidad
+                dt = 0.01  
                 steps = int(time_steps / dt)
                 t = 0.0 
                 
-                # Método Euler-Cromer
+                # Bucle de evolución temporal
                 for _ in range(steps):
                     Y_new = Y + (X - X**3 - delta * Y + F * np.cos(omega * t)) * dt
                     X_new = X + Y_new * dt
                     
                     X, Y = X_new, Y_new
                     
-                    mask = (X**2 + Y**2 < 100) 
+                    # 3. Relajamos el límite de escape (de 50 a 1000)
+                    # Si restringimos mucho, borramos trayectorias válidas que solo "daban un paseo"
+                    mask = (X**2 + Y**2 < 1000) 
                     X[~mask] = np.nan
                     Y[~mask] = np.nan
                     
                     t += dt 
                 
+                # Calculamos el ángulo final
                 basins_angle = np.arctan2(Y, X)
                 return basins_angle
 
-            with st.spinner('Calculando la estructura fractal...'):
-                # Color de fondo de la figura global
+            with st.spinner('Simulando caos (esto puede tardar un poco por la precisión extra)...'):
+                # Crear figura con fondo oscuro
                 fig = plt.figure(figsize=(10, 10), facecolor='#0E1117')
                 
+                # Calcular
                 basins = duffing_basins_paper_style(resolucion, delta, t_max, F, omega)
                 
-                plt.imshow(basins, cmap='jet', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
+                # Visualizar: 'twilight' es excelente para ángulos porque es cíclico
+                # Usamos interpolation='nearest' para que los píxeles se vean nítidos
+                plt.imshow(basins, cmap='twilight', extent=[-2, 2, -2, 2], origin='lower', interpolation='nearest')
                 
-                plt.title(f"Duffing Fractal ($\delta={delta:.2f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
+                plt.title(f"Duffing Fractal ($\delta={delta:.3f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
                 plt.xlabel('$x$', color='white', fontsize=14)
                 plt.ylabel('$\dot{x}$', color='white', fontsize=14)
                 
-                # --- CORRECCIÓN DEL BORDE BLANCO ---
+                # Estilo oscuro para ejes
                 ax = plt.gca()
-                # 1. Forzar el color de fondo de los ejes
                 ax.set_facecolor('#0E1117')
-                
-                # Configuración de colores para ejes y texto
                 ax.tick_params(axis='x', colors='white')
                 ax.tick_params(axis='y', colors='white')
                 for spine in ax.spines.values(): spine.set_color('white')
                 
-                # 2. Eliminar márgenes extra
                 plt.tight_layout()
-
-                # Pasar la figura explícitamente ayuda a veces
                 st.pyplot(fig)
  
     elif opcion == "Fractal de Newton (Próximamente)":
@@ -361,6 +363,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
