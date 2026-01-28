@@ -338,7 +338,7 @@ else:
                 basins = duffing_basins_paper_style(resolucion, delta, t_max, F, omega)
                 
                 # Usamos un mapa de colores cíclico (hsv o twilight) para los ángulos
-                plt.imshow(basins, cmap='hsv', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
+                plt.imshow(basins, cmap='twilight', extent=[-2.5, 2.5, -2.5, 2.5], origin='lower')
                 
                 plt.title(f"Duffing Fractal ($\delta={delta:.2f}, F={F:.3f}, \omega={omega:.2f}$)", color='white')
                 plt.xlabel('$x$', color='white', fontsize=14)
@@ -346,10 +346,16 @@ else:
                 
                 # Configuración para que parezca más una figura de artículo
                 ax = plt.gca()
+                # 1. Forzar el color de fondo de los ejes
+                ax.set_facecolor('#0E1117')
+                
+                # Configuración de colores para ejes y texto
                 ax.tick_params(axis='x', colors='white')
                 ax.tick_params(axis='y', colors='white')
                 for spine in ax.spines.values(): spine.set_color('white')
-
+                
+                # 2. Eliminar márgenes extra
+                plt.tight_layout()
                 st.pyplot(plt)
  
     elif opcion == "Fractal de Newton (Próximamente)":
@@ -362,6 +368,7 @@ else:
         """)
         st.latex(r"z_{n+1} = z_n - \frac{f(z_n)}{f'(z_n)}")
         st.info("🚧 Sección en construcción.")
+
 
 
 
